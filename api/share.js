@@ -14,29 +14,23 @@ export default function handler(req) {
     const t = e(title);
     const d = e(desc);
     const u = e(target);
-    const i = icon ? e(icon) : '';
 
     const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>${t}</title>
 <meta name="description" content="${d}">
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
-<meta property="og:type" content="article">
-${i ? `<meta property="og:image" content="${i}">` : ''}
-<meta name="twitter:title" content="${t}">
-<meta name="twitter:description" content="${d}">
+<meta property="og:type" content="website">
+${icon ? `<meta property="og:image" content="${e(icon)}">` : ''}
+<meta http-equiv="refresh" content="0;url=${u}">
 </head>
-<body>${d}<br><a href="${u}">加入</a></body>
+<body>${d}</body>
 </html>`;
 
     return new Response(html, {
-        headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'no-cache'
-        }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
     });
 }
