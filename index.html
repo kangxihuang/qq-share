@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QQ群分享卡片生成器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-top: 10px;
+        }
+        .form-group {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #12B7F5;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .preview-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .preview-section h2 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        .qq-card {
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .qq-card-body { padding: 12px; }
+        .qq-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .qq-card-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .qq-card-footer {
+            padding: 8px 12px;
+            background: #f9f9f9;
+            border-top: 1px solid #f0f0f0;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-primary {
+            background: linear-gradient(135deg, #12B7F5, #0099FF);
+            color: white;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c5ce7, #a855f7);
+            color: white;
+        }
+        .btn-outline {
+            background: white;
+            color: #12B7F5;
+            border: 1.5px solid #12B7F5;
+        }
+
+        .tip {
+            background: #fff8e1;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 13px;
+            color: #8a6d00;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .tip strong { color: #e67e00; }
+
+        .result-area {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .result-area h2 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .result-area pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .copy-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .copy-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .steps {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .steps h2 {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 14px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .step:last-child { margin-bottom: 0; }
+        .step-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #12B7F5;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 10px;
+            margin-top: 1px;
+        }
+        .step-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+        .step-text code {
+            background: #f0f0f0;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .deploy-options {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .deploy-options h2 {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .deploy-option {
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .deploy-option:hover { border-color: #12B7F5; }
+        .deploy-option h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .deploy-option p {
+            font-size: 12px;
+            color: #999;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QQ群分享卡片自定义</h1>
+
+        <div class="tip">
+            <strong>原理：</strong>创建一个带有自定义标题和描述的网页，部署后通过夸克浏览器分享该网页链接到QQ，QQ会读取网页的元信息来显示自定义的分享卡片。
+        </div>
+
+        <div class="form-group">
+            <label>QQ群分享链接</label>
+            <textarea id="qqLink" placeholder="粘贴QQ群分享链接...">https://qun.qq.com/universal-share/share?ac=1&authKey=19P%2F69sD8kzXgYfxGZJABerbINvBi9%2Fv69aVp%2F5Gdfprs4wH%2BNVUUXwoyWJq8XJ6&busi_data=eyJncm91cENvZGUiOiI4NjE1MjM3MjYiLCJ0b2tlbiI6IkI4TVczLzdwYkRXWGY5bDZYQ0dLdVlVYUxQQy9PMGJ3djI5dU15ZldVREhSVEFoYUhKNldYVEs0MXV2MHYrMzkiLCJ1aW4iOiI0MjgzODE3NTgifQ%3D%3D&data=1Xi6HXqxkvWtBZZ1ACG_x0hx43KuwhHYUd0c6OsB4hrRsofsXpxgvmW-ftYicV3Qs1PMXZL7p25klNyyKUsiIA&svctype=4&tempid=h5_group_info</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>自定义标题</label>
+            <input type="text" id="customTitle" placeholder="输入分享卡片标题" value="欢迎加入我们的群聊">
+        </div>
+
+        <div class="form-group">
+            <label>自定义描述</label>
+            <textarea id="customDesc" placeholder="输入分享卡片描述">一个有趣的交流群，快来加入吧！</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>自定义图标链接（可选）</label>
+            <input type="text" id="customIcon" placeholder="https://example.com/icon.png">
+        </div>
+
+        <div class="preview-section">
+            <h2>分享卡片预览（模拟效果）</h2>
+            <div class="qq-card">
+                <div class="qq-card-body">
+                    <div class="qq-card-title" id="previewTitle">欢迎加入我们的群聊</div>
+                    <div class="qq-card-desc" id="previewDesc">一个有趣的交流群，快来加入吧！</div>
+                </div>
+                <div class="qq-card-footer" id="previewFooter">来自你的网站</div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateHTML()">生成分享页面代码</button>
+
+        <div class="result-area" id="resultArea">
+            <h2>生成的 HTML 代码</h2>
+            <pre id="resultCode"></pre>
+            <br>
+            <button class="btn btn-secondary" onclick="copyCode()">复制代码</button>
+            <button class="btn btn-outline" onclick="downloadHTML()">下载 HTML 文件</button>
+        </div>
+
+        <div class="deploy-options" id="deployOptions">
+            <h2>如何部署使用</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">将生成的 HTML 文件上传到任意网页托管服务</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-text">获取部署后的网页链接（如 <code>https://你的域名/share.html</code>）</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">在夸克浏览器中打开该链接</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">点击夸克底部菜单 → 分享 → 分享到QQ</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <div class="step-text">QQ会显示你自定义的标题和描述</div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 16px; font-size: 14px; color: #666; margin-bottom: 10px;">免费托管推荐</h2>
+            <div class="deploy-option" onclick="window.open('https://pages.github.com/')">
+                <h3>GitHub Pages</h3>
+                <p>免费、稳定，适合长期使用。需要 GitHub 账号。</p>
+            </div>
+            <div class="deploy-option" onclick="window.open('https://vercel.com/')">
+                <h3>Vercel</h3>
+                <p>一键部署，速度快，免费额度充足。</p>
+            </div>
+            <div class="deploy-option" onclick="window.open('https://www.netlify.com/')">
+                <h3>Netlify</h3>
+                <p>拖拽上传即可部署，非常简单。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="copy-toast" id="toast">已复制到剪贴板</div>
+
+    <script>
+        var titleInput = document.getElementById('customTitle');
+        var descInput = document.getElementById('customDesc');
+        var previewTitle = document.getElementById('previewTitle');
+        var previewDesc = document.getElementById('previewDesc');
+
+        titleInput.addEventListener('input', function() {
+            previewTitle.textContent = this.value || '标题';
+        });
+        descInput.addEventListener('input', function() {
+            previewDesc.textContent = this.value || '描述';
+        });
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        function generateHTML() {
+            var link = document.getElementById('qqLink').value.trim();
+            var title = titleInput.value.trim() || '欢迎加入群聊';
+            var desc = descInput.value.trim() || '快来加入我们吧';
+            var icon = document.getElementById('customIcon').value.trim();
+
+            var iconMeta = icon
+                ? '<meta property="og:image" content="' + escapeHtml(icon) + '">\n    <meta itemprop="image" content="' + escapeHtml(icon) + '">\n    <link rel="icon" href="' + escapeHtml(icon) + '">'
+                : '<!-- 如需自定义图标，添加: <meta property="og:image" content="图片链接"> -->';
+
+            var html = '<!DOCTYPE html>\n'
+                + '<html lang="zh-CN">\n'
+                + '<head>\n'
+                + '    <meta charset="UTF-8">\n'
+                + '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+                + '    <title>' + escapeHtml(title) + '</title>\n'
+                + '    <meta property="og:title" content="' + escapeHtml(title) + '">\n'
+                + '    <meta property="og:description" content="' + escapeHtml(desc) + '">\n'
+                + '    <meta property="og:type" content="website">\n'
+                + '    ' + iconMeta + '\n'
+                + '    <meta name="description" content="' + escapeHtml(desc) + '">\n'
+                + '    <meta itemprop="name" content="' + escapeHtml(title) + '">\n'
+                + '    <meta itemprop="description" content="' + escapeHtml(desc) + '">\n'
+                + '    <style>\n'
+                + '        * { margin: 0; padding: 0; box-sizing: border-box; }\n'
+                + '        body {\n'
+                + '            font-family: -apple-system, sans-serif;\n'
+                + '            background: linear-gradient(135deg, #667eea, #764ba2);\n'
+                + '            min-height: 100vh;\n'
+                + '            display: flex;\n'
+                + '            align-items: center;\n'
+                + '            justify-content: center;\n'
+                + '        }\n'
+                + '        .card {\n'
+                + '            background: white;\n'
+                + '            border-radius: 16px;\n'
+                + '            padding: 40px 30px;\n'
+                + '            max-width: 360px;\n'
+                + '            width: 90%;\n'
+                + '            text-align: center;\n'
+                + '            box-shadow: 0 20px 60px rgba(0,0,0,0.2);\n'
+                + '        }\n'
+                + '        h1 { font-size: 22px; color: #333; margin-bottom: 10px; }\n'
+                + '        p { font-size: 15px; color: #666; line-height: 1.6; margin-bottom: 24px; }\n'
+                + '        .btn {\n'
+                + '            display: inline-block;\n'
+                + '            background: linear-gradient(135deg, #12B7F5, #0099FF);\n'
+                + '            color: white;\n'
+                + '            text-decoration: none;\n'
+                + '            padding: 14px 40px;\n'
+                + '            border-radius: 50px;\n'
+                + '            font-size: 16px;\n'
+                + '            font-weight: 600;\n'
+                + '        }\n'
+                + '    </style>\n'
+                + '</head>\n'
+                + '<body>\n'
+                + '    <div class="card">\n'
+                + '        <h1>' + escapeHtml(title) + '</h1>\n'
+                + '        <p>' + escapeHtml(desc) + '</p>\n'
+                + '        <a class="btn" href="' + escapeHtml(link) + '">立即加入</a>\n'
+                + '    </div>\n'
+                + '</body>\n'
+                + '</html>';
+
+            document.getElementById('resultCode').textContent = html;
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('deployOptions').style.display = 'block';
+
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyCode() {
+            var code = document.getElementById('resultCode').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                showToast('已复制到剪贴板');
+            }).catch(function() {
+                var textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('已复制到剪贴板');
+            });
+        }
+
+        function downloadHTML() {
+            var code = document.getElementById('resultCode').textContent;
+            var blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'share.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('文件已下载');
+        }
+
+        function showToast(msg) {
+            var toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
