@@ -1,8 +1,11 @@
-module.exports = (req, res) => {
-    const title = req.query.title || '欢迎加入群聊';
-    const desc = req.query.desc || '快来加入我们吧！';
-    const url = req.query.url || '';
-    const icon = req.query.icon || '';
+export const config = { runtime: 'edge' };
+
+export default function handler(req) {
+    const url = new URL(req.url);
+    const title = url.searchParams.get('title') || '欢迎加入群聊';
+    const desc = url.searchParams.get('desc') || '快来加入我们吧！';
+    const target = url.searchParams.get('url') || '';
+    const icon = url.searchParams.get('icon') || '';
 
     function e(s) {
         return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -10,7 +13,7 @@ module.exports = (req, res) => {
 
     const t = e(title);
     const d = e(desc);
-    const u = e(url);
+    const u = e(target);
     const i = icon ? e(icon) : '';
 
     const html = `<!DOCTYPE html>
@@ -23,23 +26,17 @@ module.exports = (req, res) => {
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://qq-share-two.vercel.app/s">
 ${i ? `<meta property="og:image" content="${i}">` : ''}
-<meta property="og:site_name" content="${t}">
-<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${t}">
 <meta name="twitter:description" content="${d}">
-<meta itemprop="name" content="${t}">
-<meta itemprop="description" content="${d}">
 </head>
-<body>
-<h1>${t}</h1>
-<p>${d}</p>
-<a href="${u}">加入</a>
-</body>
+<body>${d}<br><a href="${u}">加入</a></body>
 </html>`;
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.status(200).send(html);
-};
+    return new Response(html, {
+        headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache'
+        }
+    });
+}
