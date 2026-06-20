@@ -6,7 +6,7 @@ export default function handler(req) {
     const desc = (u.searchParams.get('desc') || '+旺旺1111166').slice(0, 40);
     const target = u.searchParams.get('url') || 'https://qun.qq.com/universal-share/share?ac=1&authKey=19P%2F69sD8kzXgYfxGZJABerbINvBi9%2Fv69aVp%2F5Gdfprs4wH%2BNVUUXwoyWJq8XJ6&busi_data=eyJncm91cENvZGUiOiI4NjE1MjM3MjYiLCJ0b2tlbiI6IkI4TVczLzdwYkRXWGY5bDZYQ0dLdVlVYUxQQy9PMGJ3djI5dU15ZldVREhSVEFoYUhKNldYVEs0MXV2MHYrMzkiLCJ1aW4iOiI0MjgzODE3NTgifQ%3D%3D&data=1Xi6HXqxkvWtBZZ1ACG_x0hx43KuwhHYUd0c6OsB4hrRsofsXpxgvmW-ftYicV3Qs1PMXZL7p25klNyyKUsiIA&svctype=4&tempid=h5_group_info';
     const img = u.searchParams.get('img') || 'http://p.qlogo.cn/gh/861523726/861523726/640/';
-    const appName = u.searchParams.get('app') || '加拿大28';
+    const appName = u.searchParams.get('app') || '夸克';
 
     function e(s) {
         return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;');
